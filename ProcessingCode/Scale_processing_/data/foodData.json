@@ -1,0 +1,31 @@
+[{
+    "name": "Coke",
+    "barcode": "9300675013406",
+    "calories": 43,
+    "servingSize": 390,
+}, {
+    "name": "Milk",
+    "barcode": "9300601487769",
+    "calories": 45,
+    "servingSize": 250,
+},{
+    "name": "Pesi Max",
+    "barcode": "9313820016603",
+    "calories": 0.4,
+    "servingSize": 250,
+},{
+    "name": "Sambal",
+    "barcode": "8994907000022",
+    "calories": 194,
+    "servingSize": 15,
+},{
+    "name": "Original Show bag icecream",
+    "barcode": "9347042001345",
+    "calories": 179,
+    "servingSize": 46,
+},{
+    "name": "Thick and Creamy Yougurt ",
+    "barcode": "9300658406621",
+    "calories": 124,
+    "servingSize": 150,
+}]
