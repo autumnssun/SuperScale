@@ -1,7 +1,7 @@
-import processing.serial.*;
+import com.yourinventit.processing.android.serial.Serial;
 import controlP5.*;
 
-JSONArray jsonAr;
+JSONArray jsonAr; //<>//
 ControlP5 cp5;
 Textlabel f;
 Textlabel w;
@@ -9,11 +9,13 @@ Textlabel c;
 Textlabel t;
 Textlabel s;
 
-Textlabel foodLabel;
+Textlabel foodLabel; //<>//
 Textlabel weightLabel;
 Textlabel caloriesLabel;
 Textlabel servingsLabel;
 Textlabel totalCalories;
+
+Textlabel console;
 
 Serial myPort;
 final char newline= '\n';
@@ -26,8 +28,8 @@ Float weightZeroOffset = 0.0;
 @Override
   public void setup() {
   myPort=initPort();
-  myPort.bufferUntil('\n');
-  size(700, 400);
+  //myPort.bufferUntil('\n');
+  size(1000, 1000);
   cp5 = new ControlP5(this);
   setUpUI();
 }
@@ -48,13 +50,19 @@ void setUpUI() {
   caloriesLabel=cp5.addTextlabel("caloriesLabel").setText("kcal").setPosition(150, 120).setColorValue(0x000000).setFont(createFont("Helvetica", 35, true));
   servingsLabel=cp5.addTextlabel("servingsLabel").setText("sers").setPosition(150, 170).setColorValue(0x000000).setFont(createFont("Helvetica", 35, true));
   totalCalories=cp5.addTextlabel("totalCalories").setText("tol").setPosition(150, 220).setColorValue(0x000000).setFont(createFont("Helvetica", 35, true));
+  
+  console = cp5.addTextlabel("console").setText("console:").setPosition(10, 400).setColorValue(0x000000).setFont(createFont("Helvetica", 35, true));
+  
 }
 void drawUI() {
   background(255);
 }
 
 public JSONObject getNutrition(String matchBarcode ) {
-  jsonAr = loadJSONArray("foodData.json");
+  
+   String lines[] = loadStrings("data/foodData.json"); 
+   JSONArray jsonAr = JSONArray.parse(lines[0]);
+  //jsonAr = loadJSONArray("foodData.json");
   for (int i=0; i<jsonAr.size(); i++) {
     JSONObject json= jsonAr.getJSONObject(i);
     String barcode = json.getString("barcode");
@@ -72,11 +80,13 @@ public JSONObject getNutrition(String matchBarcode ) {
 }
 
 public Serial initPort() {
-  for (int i=0; i< Serial.list().length; i++) {
-    if (Serial.list()[i].startsWith("/dev/tty.usbmodem")) {
-      return new Serial(this, Serial.list()[i], 9600);
-    }
+  for (int i=0; i< Serial.list(this).length; i++) {
+    //if (Serial.list(this)[0].startsWith("/dev/tty.usbmodem")) {
+      return new Serial(this, Serial.list(this)[0], 9600);
+    //}
   }
+  console.setText(Serial.list(this)[0]);   
+
   return null;
 }
 
@@ -139,7 +149,6 @@ public void readWhile() {
 @Override
   public void keyPressed() {
   barcode=barcode+key;
-  println(hex(key));
   if (key==newline) {
     String barcodeString = cleanNumber(barcode);
     currentItem = getNutrition(barcodeString);
