@@ -33,12 +33,13 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.hoho.android.usbserial.driver.UsbSerialPort;
-import com.hoho.android.usbserial.util.HexDump;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.json.*;
 
 /**
  * Monitors a single {@link UsbSerialPort} instance, showing all data
@@ -62,15 +63,32 @@ public class SerialConsoleActivity extends Activity {
      */
     private static UsbSerialPort sPort = null;
 
+
+    private static String url = "http://autumnssun.github.io/foodData.json";
+
+
     private TextView mTitleTextView;
-    private TextView mDumpTextView;
+    private TextView consoleText;
     private ScrollView mScrollView;
+
+    private TextView weightTextView;
+    private TextView foodTextView;
+    private TextView caloriesTextView;
+    private TextView servingTextView;
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
     private SerialInputOutputManager mSerialIoManager;
     String message="";
     String barcode="";
+    JSONArray jsonAr;
+
+
+    static InputStream is = null;
+    static JSONObject jObj = null;
+    static String json = "";
+
+
     private final SerialInputOutputManager.Listener mListener =
             new SerialInputOutputManager.Listener() {
 
@@ -95,17 +113,41 @@ public class SerialConsoleActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.serial_console);
         mTitleTextView = (TextView) findViewById(R.id.demoTitle);
-        mDumpTextView = (TextView) findViewById(R.id.consoleText);
         mScrollView = (ScrollView) findViewById(R.id.demoScroller);
+
+        consoleText = (TextView) findViewById(R.id.consolelog);
+        weightTextView =  (TextView) findViewById(R.id.weight);
+        foodTextView = (TextView) findViewById(R.id.foodname);
+        caloriesTextView = (TextView) findViewById(R.id.calories);
+        servingTextView = (TextView) findViewById(R.id.serving);
+
+        try {
+            jsonthingy();
+        } catch (Exception e) {
+            consoleText.append(e.toString());
+        }
     }
+
+
+    public void jsonthingy () throws Exception {
+        // Creating new JSON Parser
+        JSONParser parser = new JSONParser();
+        JSONObject json=parser.getJson(url);
+        if (json != null) {
+            Log.e(json.toString());
+        }
+        assert json != null;
+        consoleText.append(json.toString());
+    }
+
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         char unicodeChar = (char)event.getUnicodeChar();
-        mDumpTextView.append(keyCode+"\n");
+        consoleText.append(keyCode+"\n");
         if(keyCode==31) {
-            mDumpTextView.append("Keyboard:" + barcode + "\n");
-            mScrollView.smoothScrollTo(0, mDumpTextView.getBottom());
+            consoleText.append("Keyboard:" + barcode + "\n");
+            mScrollView.smoothScrollTo(0, consoleText.getBottom());
             barcode="";
         }else{
             barcode+=unicodeChar;
@@ -127,6 +169,9 @@ public class SerialConsoleActivity extends Activity {
         }
         finish();
     }
+
+
+
 
     @Override
     protected void onResume() {
@@ -186,8 +231,8 @@ public class SerialConsoleActivity extends Activity {
     private void updateReceivedData(byte[] data) {
         for (int i=0; i<data.length;i++)
             if (data[i] == '\n') {
-                mDumpTextView.append("Weight:"+message+"\n");
-                mScrollView.smoothScrollTo(0, mDumpTextView.getBottom());
+                consoleText.append("Weight:"+message+"\n");
+                mScrollView.smoothScrollTo(0, consoleText.getBottom());
                 message="";
             } else {
                 message += (char) data[i];
