@@ -38,9 +38,9 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:paddingLeft="50px"
-            android:paddingTop="3pt"
-            android:paddingBottom="3pt" />
+            android:paddingLeft="10dp"
+            android:paddingTop="5pt"
+            android:paddingBottom="5pt" />
     </ScrollView>
 
     <Space
@@ -64,7 +64,7 @@
         android:layout_alignParentStart="true"
         android:text="Weight:"
         android:layout_below="@+id/demoTitle"
-        android:paddingLeft="50px"
+        android:paddingLeft="10dp"
         android:paddingTop="3dp"
         android:paddingBottom="3dp" />
 
@@ -79,7 +79,7 @@
         android:layout_below="@+id/w"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:paddingLeft="50px"
+        android:paddingLeft="10dp"
         android:paddingTop="3dp"
         android:paddingBottom="3dp" />
 
@@ -96,7 +96,7 @@
         android:layout_toRightOf="@+id/s"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:paddingRight="50px"
+        android:paddingRight="10dp"
         android:paddingLeft="3dp"
         android:paddingTop="3dp"
         android:paddingBottom="3dp" />
@@ -112,7 +112,7 @@
         android:layout_below="@+id/f"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:paddingLeft="50px"
+        android:paddingLeft="10dp"
         android:paddingTop="3dp"
         android:paddingBottom="3dp" />
 
@@ -125,15 +125,15 @@
         android:textSize="13pt"
         android:text="foodname"
         android:gravity="right"
-        android:layout_below="@+id/weight"
-        android:layout_alignRight="@+id/weight"
-        android:layout_alignEnd="@+id/weight"
-        android:layout_toEndOf="@+id/f"
-        android:layout_toRightOf="@+id/f"
         android:paddingLeft="3dp"
         android:paddingTop="3dp"
         android:paddingBottom="3dp"
-        android:paddingRight="50px" />
+        android:paddingRight="10dp"
+        android:layout_below="@+id/w"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toRightOf="@+id/f"
+        android:layout_toEndOf="@+id/f" />
 
     <TextView
         android:id="@+id/weight"
@@ -152,7 +152,7 @@
         android:paddingLeft="3dp"
         android:paddingTop="3dp"
         android:paddingBottom="3dp"
-        android:paddingRight="50px" />
+        android:paddingRight="10dp" />
 
     <TextView
         android:id="@+id/s"
@@ -165,7 +165,7 @@
         android:layout_below="@+id/c"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:paddingLeft="50px"
+        android:paddingLeft="10dp"
         android:paddingTop="3dp"
         android:paddingBottom="3dp" />
 
@@ -187,7 +187,7 @@
         android:paddingLeft="3dp"
         android:paddingTop="3dp"
         android:paddingBottom="3dp"
-        android:paddingRight="50px" />
+        android:paddingRight="10dp" />
 
     <Space
         android:layout_width="fill_parent"

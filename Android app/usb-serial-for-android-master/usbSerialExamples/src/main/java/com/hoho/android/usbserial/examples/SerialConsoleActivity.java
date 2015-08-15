@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -35,10 +36,19 @@ import android.widget.TextView;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.*;
 
 /**
@@ -77,16 +87,16 @@ public class SerialConsoleActivity extends Activity {
     private TextView servingTextView;
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+    AsyncTask<String, String, String> request;
+
 
     private SerialInputOutputManager mSerialIoManager;
     String message="";
     String barcode="";
-    JSONArray jsonAr;
-
-
-    static InputStream is = null;
-    static JSONObject jObj = null;
-    static String json = "";
+    JSONArray jsonArray;
+    JSONObject currentItem = new JSONObject();
+    Float currentWeight= new Float(0.0);
+    Float weightZeroOffset = new Float(0.0);
 
 
     private final SerialInputOutputManager.Listener mListener =
@@ -116,43 +126,90 @@ public class SerialConsoleActivity extends Activity {
         mScrollView = (ScrollView) findViewById(R.id.demoScroller);
 
         consoleText = (TextView) findViewById(R.id.consolelog);
-        weightTextView =  (TextView) findViewById(R.id.weight);
+        weightTextView = (TextView) findViewById(R.id.weight);
         foodTextView = (TextView) findViewById(R.id.foodname);
         caloriesTextView = (TextView) findViewById(R.id.calories);
         servingTextView = (TextView) findViewById(R.id.serving);
 
-        try {
-            jsonthingy();
-        } catch (Exception e) {
-            consoleText.append(e.toString());
-        }
+        //Request the Json
+        new RequestTask().execute(url);
+
+
     }
 
 
-    public void jsonthingy () throws Exception {
-        // Creating new JSON Parser
-        JSONParser parser = new JSONParser();
-        JSONObject json=parser.getJson(url);
-        if (json != null) {
-            Log.e(json.toString());
-        }
-        assert json != null;
-        consoleText.append(json.toString());
+    boolean noItemOnScale(Float weight) {
+        return weight < 1.0;
     }
-
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        //Listen to keyboard Event and add up the bar code value
         char unicodeChar = (char)event.getUnicodeChar();
-        consoleText.append(keyCode+"\n");
         if(keyCode==31) {
-            consoleText.append("Keyboard:" + barcode + "\n");
+            //31-> Exit code for bar code scaner
+            //consoleText.append("Keyboard:" + barcode + "\n");
             mScrollView.smoothScrollTo(0, consoleText.getBottom());
-            barcode="";
+
+            currentItem = getNutrition(barcode); //getNutrition if barcode not found, this function returns jsonObject with name: Product not found
+            if (currentItem == null) {
+                foodTextView.setText("Product not recognized");
+                weightZeroOffset = currentWeight;
+                barcode="";
+                return true;
+            }
+            try {
+                String name = currentItem.getString("name");
+                foodTextView.setText(name);
+                weightZeroOffset = currentWeight;
+            }catch (Exception e){
+
+            }
+
+
         }else{
             barcode+=unicodeChar;
         }
         return true;
+    }
+
+
+    //This function to clean up bar code, make sure it is only contains digits
+    public String cleanNumber(String value) {
+        String str = value.replaceAll("[^A-Za-z0-9 ]", "");
+        str=str.replaceAll("ONE", "1");
+        return str;
+    }
+
+    private JSONObject getNutrition(String matchBarcode) {
+        JSONObject nulljson = null;
+        for (int i=0; i<jsonArray.length(); i++) {
+            JSONObject json;
+            try {
+                json = jsonArray.getJSONObject(i);
+                String barcode;
+                barcode = json.getString("barcode");
+                String toLookForBarcode=cleanNumber(matchBarcode);
+                if (barcode.equals(toLookForBarcode)) {
+                    this.barcode="";
+                    return json;
+                }
+            } catch (JSONException e) {
+                consoleText.append(e.toString()+"\n");
+            }
+        }
+
+
+        try {
+            nulljson = new JSONObject();
+            nulljson.put("name", "Product not recorgnized");
+            nulljson.put("barcode", "null");
+            nulljson.put("calories", 0);
+            nulljson.put("servingSize", 0);
+        }catch (Exception e){
+            consoleText.append(e.toString()+"\n");
+        }
+        return nulljson;
     }
 
     @Override
@@ -169,9 +226,6 @@ public class SerialConsoleActivity extends Activity {
         }
         finish();
     }
-
-
-
 
     @Override
     protected void onResume() {
@@ -229,21 +283,58 @@ public class SerialConsoleActivity extends Activity {
     }
 
     private void updateReceivedData(byte[] data) {
-        for (int i=0; i<data.length;i++)
+        for (int i=0; i<data.length;i++) {
             if (data[i] == '\n') {
-                consoleText.append("Weight:"+message+"\n");
+                consoleText.append("Real reading:"+message+"\n");
                 mScrollView.smoothScrollTo(0, consoleText.getBottom());
-                message="";
+
+                try {
+                    currentWeight = Float.parseFloat(message);
+                    message = "";
+                    Float zeroedWeight = currentWeight - weightZeroOffset;
+                    if (zeroedWeight < 1 || noItemOnScale(currentWeight)) {
+                        weightTextView.setText("0");
+                        caloriesTextView.setText("0");
+                        servingTextView.setText("0");
+
+                        if (noItemOnScale(currentWeight)) {
+                            weightZeroOffset = new Float(0.0);
+                            currentItem = null;
+                            foodTextView.setText("");
+                        }
+                        return;
+                    }
+
+                    weightTextView.setText(String.format("%.0f", (zeroedWeight)) + "g" + "\n");
+                    if (currentItem == null) {
+                        return;
+                    }
+
+                    Double calories = currentItem.getDouble("calories");
+                    Double servingSize = currentItem.getDouble("servingSize");
+
+                    consoleText.append("Calories:" + calories + "\n");
+                    consoleText.append("Serving:" + servingSize + "\n");
+                    mScrollView.smoothScrollTo(0, consoleText.getBottom());
+                    caloriesTextView.setText(String.format("%.0f", (calories / 100 * zeroedWeight)));
+
+                    servingTextView.setText(String.format("%.2f", (zeroedWeight / servingSize)));
+                } catch (Exception e) {
+                    message = "";
+                    consoleText.append(e.toString()+ "\n");
+                }
+                //reset meessgae
+
             } else {
                 message += (char) data[i];
             }
+        }
     }
 
     /**
      * Starts the activity, using the supplied driver instance.
      *
      * @param context
-     * @param driver
      */
     static void show(Context context, UsbSerialPort port) {
         sPort = port;
@@ -251,5 +342,49 @@ public class SerialConsoleActivity extends Activity {
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NO_HISTORY);
         context.startActivity(intent);
     }
+
+    class RequestTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... uri) {
+            HttpClient httpclient = new DefaultHttpClient();
+            HttpResponse response;
+            String responseString = null;
+            try {
+                response = httpclient.execute(new HttpGet(uri[0]));
+                StatusLine statusLine = response.getStatusLine();
+                if(statusLine.getStatusCode() == HttpStatus.SC_OK){
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    response.getEntity().writeTo(out);
+                    responseString = out.toString();
+                    out.close();
+                } else{
+                    //Closes the connection.
+                    response.getEntity().getContent().close();
+                    throw new IOException(statusLine.getReasonPhrase());
+                }
+            } catch (ClientProtocolException e) {
+                //TODO Handle problems..
+            } catch (IOException e) {
+                //TODO Handle problems..
+            }
+            return responseString;
+        }
+
+        @Override
+        public void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            if(result!=null){
+                try {
+                    jsonArray = new JSONArray(result);
+                    //consoleText.append(jsonArray.toString() + "\n");
+                }catch (Exception e){
+                    consoleText.append(e.toString()+"\n");
+                }
+            }
+        }
+    }
+
 
 }
