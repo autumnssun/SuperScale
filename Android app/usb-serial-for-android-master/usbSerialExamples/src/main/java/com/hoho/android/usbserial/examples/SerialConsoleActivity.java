@@ -74,7 +74,7 @@ public class SerialConsoleActivity extends Activity {
     private static UsbSerialPort sPort = null;
 
 
-    private static String url = "http://autumnssun.github.io/foodData.json";
+    private static String url = "https://script.googleusercontent.com/macros/echo?user_content_key=Mz9oMnfXcasnEQL1cZmGnsf7EodLxb7rs2_wOpNsve8KOkuRIq5nSW0ydIWnzsFudpvwXUGAMgFNn7B9FKHPcVgGZJWfRPGrOJmA1Yb3SEsKFZqtv3DaNYcMrmhZHmUMWojr9NvTBuBLhyHCd5hHa1GhPSVukpSQTydEwAEXFXgt_wltjJcH3XHUaaPC1fv5o9XyvOto09QuWI89K6KjOu0SP2F-BdwU4K-6ACMkzAYXyqQugWa-JSsSVo_j15p99MDBn26Q6TrN8uYpFm42KU8tj7zq3GK55y7FLqOV0Tk27B8Rh4QJTQ&lib=MnrE7b2I2PjfH799VodkCPiQjIVyBAxva";
 
 
     private TextView mTitleTextView;
@@ -377,8 +377,9 @@ public class SerialConsoleActivity extends Activity {
 
             if(result!=null){
                 try {
-                    jsonArray = new JSONArray(result);
-                    //consoleText.append(jsonArray.toString() + "\n");
+                    JSONObject jObjec= new JSONObject(result);
+                    jsonArray = jObjec.getJSONArray("Sheet1");
+                    consoleText.append(jsonArray.toString() + "\n");
                 }catch (Exception e){
                     consoleText.append(e.toString()+"\n");
                 }
