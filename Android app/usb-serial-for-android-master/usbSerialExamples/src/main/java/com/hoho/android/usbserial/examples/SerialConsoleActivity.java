@@ -298,9 +298,9 @@ public class SerialConsoleActivity extends Activity {
                         servingTextView.setText("0");
 
                         if (noItemOnScale(currentWeight)) {
-                            weightZeroOffset = new Float(0.0);
-                            currentItem = null;
-                            foodTextView.setText("");
+//                            weightZeroOffset = new Float(0.0);
+//                            currentItem = null;
+//                            foodTextView.setText("");
                         }
                         return;
                     }
