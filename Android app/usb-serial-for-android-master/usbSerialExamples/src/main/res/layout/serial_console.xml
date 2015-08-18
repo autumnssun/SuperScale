@@ -16,13 +16,123 @@
         android:paddingTop="10dp"
         android:paddingBottom="10dp" />
 
+
+
+
+
+    <!--<TextView-->
+        <!--android:id="@+id/w"-->
+        <!--android:textIsSelectable="false"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:typeface="monospace"-->
+        <!--android:textSize="13pt"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true"-->
+        <!--android:text="Weight:"-->
+        <!--android:layout_below="@+id/demoTitle"-->
+        <!--android:paddingLeft="10dp"-->
+        <!--android:paddingTop="3dp"-->
+        <!--android:paddingBottom="3dp" />-->
+
+    <TextView
+        android:id="@+id/weight"
+        android:textIsSelectable="false"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="13pt"
+        android:text="0 g"
+        android:gravity="right"
+        android:layout_below="@+id/demoTitle"
+        android:layout_width="wrap_content"
+        android:paddingLeft="3dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:paddingRight="10dp" />
+
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Tare"
+        android:id="@+id/tare"
+        android:layout_below="@+id/demoTitle"
+        android:layout_toRightOf="@+id/weight"
+        android:layout_toEndOf="@+id/weight"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:background="#000000"
+        android:layout_below="@+id/tare"
+        android:id="@+id/divider1"/>
+
+    <EditText
+        android:id="@+id/barcode"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:layout_below="@+id/divider1"/>
+
+    <TextView
+        android:id="@+id/foodname"
+        android:textIsSelectable="false"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="16pt"
+        android:text="Scan an item"
+        android:paddingLeft="3dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:paddingRight="10dp"
+        android:layout_below="@+id/barcode"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:id="@+id/calories"
+        android:textIsSelectable="false"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="13pt"
+        android:text="0 Cal"
+        android:layout_below="@+id/foodname"
+        android:paddingLeft="3dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:paddingRight="10dp" />
+
+    <TextView
+        android:id="@+id/serving"
+        android:textIsSelectable="false"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="13pt"
+        android:text="0 servings"
+        android:layout_below="@+id/calories"
+        android:paddingRight="10dp"
+        android:paddingLeft="3dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:background="#000000"
+        android:layout_below="@+id/serving"
+        android:id="@+id/divider2"/>
+
     <ScrollView
         android:id="@+id/demoScroller"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:fillViewport="false"
-        android:layout_below="@+id/space2"
+        android:layout_below="@+id/divider2"
         android:theme="@android:style/Theme.Black">
 
         <TextView
@@ -42,162 +152,5 @@
             android:paddingTop="5pt"
             android:paddingBottom="5pt" />
     </ScrollView>
-
-    <Space
-        android:layout_width="fill_parent"
-        android:layout_height="10sp"
-        android:id="@+id/space"
-        android:background="#1472ff"
-        android:backgroundTint="#1472ff"
-        android:layout_below="@+id/demoTitle"
-        android:layout_alignRight="@+id/s"
-        android:layout_alignEnd="@+id/s" />
-
-    <TextView
-        android:id="@+id/w"
-        android:textIsSelectable="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:typeface="monospace"
-        android:textSize="13pt"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:text="Weight:"
-        android:layout_below="@+id/demoTitle"
-        android:paddingLeft="10dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp" />
-
-    <TextView
-        android:id="@+id/f"
-        android:textIsSelectable="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:typeface="monospace"
-        android:textSize="13pt"
-        android:text="Food:"
-        android:layout_below="@+id/w"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:paddingLeft="10dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp" />
-
-    <TextView
-        android:id="@+id/serving"
-        android:textIsSelectable="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:typeface="monospace"
-        android:textSize="13pt"
-        android:text="servs"
-        android:gravity="right"
-        android:layout_below="@+id/calories"
-        android:layout_toRightOf="@+id/s"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:paddingRight="10dp"
-        android:paddingLeft="3dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp" />
-
-    <TextView
-        android:id="@+id/c"
-        android:textIsSelectable="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:typeface="monospace"
-        android:textSize="13pt"
-        android:text="Cals:"
-        android:layout_below="@+id/f"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:paddingLeft="10dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp" />
-
-    <TextView
-        android:id="@+id/foodname"
-        android:textIsSelectable="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:typeface="monospace"
-        android:textSize="13pt"
-        android:text="foodname"
-        android:gravity="right"
-        android:paddingLeft="3dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
-        android:paddingRight="10dp"
-        android:layout_below="@+id/w"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_toRightOf="@+id/f"
-        android:layout_toEndOf="@+id/f" />
-
-    <TextView
-        android:id="@+id/weight"
-        android:textIsSelectable="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:typeface="monospace"
-        android:textSize="13pt"
-        android:text="grams"
-        android:gravity="right"
-        android:layout_below="@+id/demoTitle"
-        android:layout_alignRight="@+id/serving"
-        android:layout_alignEnd="@+id/serving"
-        android:layout_toRightOf="@+id/w"
-        android:layout_toEndOf="@+id/w"
-        android:paddingLeft="3dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
-        android:paddingRight="10dp" />
-
-    <TextView
-        android:id="@+id/s"
-        android:textIsSelectable="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:typeface="monospace"
-        android:textSize="13pt"
-        android:text="Servings:"
-        android:layout_below="@+id/c"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:paddingLeft="10dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp" />
-
-    <TextView
-        android:id="@+id/calories"
-        android:textIsSelectable="false"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:typeface="monospace"
-        android:textSize="13pt"
-        android:text="calories"
-        android:gravity="right"
-        android:layout_gravity="right|top"
-        android:layout_below="@+id/foodname"
-        android:layout_alignRight="@+id/foodname"
-        android:layout_alignEnd="@+id/foodname"
-        android:layout_toRightOf="@+id/f"
-        android:layout_toEndOf="@+id/f"
-        android:paddingLeft="3dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
-        android:paddingRight="10dp" />
-
-    <Space
-        android:layout_width="fill_parent"
-        android:layout_height="30dp"
-        android:id="@+id/space2"
-        android:background="#1472ff"
-        android:backgroundTint="#1472ff"
-        android:layout_below="@+id/serving"
-        android:layout_alignRight="@+id/serving"
-        android:layout_alignEnd="@+id/serving"
-        android:alpha="1" />
 
 </RelativeLayout>

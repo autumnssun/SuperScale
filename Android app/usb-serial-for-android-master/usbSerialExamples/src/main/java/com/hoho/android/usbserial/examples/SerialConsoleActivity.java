@@ -32,6 +32,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Button;
+import android.view.View;
 
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
@@ -94,7 +96,7 @@ public class SerialConsoleActivity extends Activity {
     String message="";
     String barcode="";
     JSONArray jsonArray;
-    JSONObject currentItem = new JSONObject();
+    JSONObject currentItem = null;
     Float currentWeight= new Float(0.0);
     Float weightZeroOffset = new Float(0.0);
 
@@ -134,19 +136,20 @@ public class SerialConsoleActivity extends Activity {
         //Request the Json
         new RequestTask().execute(url);
 
-
-    }
-
-
-    boolean noItemOnScale(Float weight) {
-        return weight < 1.0;
+        Button button = (Button) findViewById(R.id.tare);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                writeMessage("Tare pressed");
+                tare();
+            }
+        });
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         //Listen to keyboard Event and add up the bar code value
         char unicodeChar = (char)event.getUnicodeChar();
-        if(keyCode==31) {
+        if(keyCode == 31) {
             //31-> Exit code for bar code scaner
             //consoleText.append("Keyboard:" + barcode + "\n");
             mScrollView.smoothScrollTo(0, consoleText.getBottom());
@@ -154,23 +157,19 @@ public class SerialConsoleActivity extends Activity {
             currentItem = getNutrition(barcode); //getNutrition if barcode not found, this function returns jsonObject with name: Product not found
             if (currentItem == null) {
                 foodTextView.setText("Product not recognized");
-                weightZeroOffset = currentWeight;
                 barcode="";
-                return true;
+                return false;
             }
             try {
                 String name = currentItem.getString("name");
                 foodTextView.setText(name);
-                weightZeroOffset = currentWeight;
             }catch (Exception e){
 
             }
-
-
         }else{
             barcode+=unicodeChar;
         }
-        return true;
+        return false;
     }
 
 
@@ -282,52 +281,62 @@ public class SerialConsoleActivity extends Activity {
         startIoManager();
     }
 
+    public void writeMessage(String message) {
+        consoleText.append(message + "\n");
+        mScrollView.smoothScrollTo(0, consoleText.getBottom());
+    }
+
+    public void tare() {
+        writeMessage("Weight zeroed");
+        weightZeroOffset = currentWeight;
+        updateWeightDisplay();
+    }
+
     private void updateReceivedData(byte[] data) {
         for (int i=0; i<data.length;i++) {
             if (data[i] == '\n') {
-                consoleText.append("Real reading:"+message+"\n");
+                writeMessage("Real reading " + message);
                 mScrollView.smoothScrollTo(0, consoleText.getBottom());
 
                 try {
                     currentWeight = Float.parseFloat(message);
                     message = "";
-                    Float zeroedWeight = currentWeight - weightZeroOffset;
-                    if (zeroedWeight < 1 || noItemOnScale(currentWeight)) {
-                        weightTextView.setText("0");
-                        caloriesTextView.setText("0");
-                        servingTextView.setText("0");
-
-                        if (noItemOnScale(currentWeight)) {
-//                            weightZeroOffset = new Float(0.0);
-//                            currentItem = null;
-//                            foodTextView.setText("");
-                        }
-                        return;
-                    }
-
-                    weightTextView.setText(String.format("%.0f", (zeroedWeight)) + "g" + "\n");
-                    if (currentItem == null) {
-                        return;
-                    }
-
-                    Double calories = currentItem.getDouble("calories");
-                    Double servingSize = currentItem.getDouble("servingSize");
-
-                    consoleText.append("Calories:" + calories + "\n");
-                    consoleText.append("Serving:" + servingSize + "\n");
-                    mScrollView.smoothScrollTo(0, consoleText.getBottom());
-                    caloriesTextView.setText(String.format("%.0f", (calories / 100 * zeroedWeight)));
-
-                    servingTextView.setText(String.format("%.2f", (zeroedWeight / servingSize)));
+                    updateWeightDisplay();
                 } catch (Exception e) {
                     message = "";
                     consoleText.append(e.toString()+ "\n");
                 }
-                //reset meessgae
-
             } else {
                 message += (char) data[i];
             }
+        }
+    }
+
+    private Float updateWeightDisplay() {
+        Float zeroedWeight = currentWeight - weightZeroOffset;
+        weightTextView.setText(String.format("%.0f", (zeroedWeight)) + "g" + "\n");
+        updateNutrition(zeroedWeight);
+        return zeroedWeight;
+    }
+
+    private void updateNutrition(Float weight) {
+        if (weight < 1 || currentItem == null) {
+            caloriesTextView.setText("0 Cal");
+            servingTextView.setText("0 Servings");
+            return;
+        }
+
+        try {
+            Double calories = currentItem.getDouble("calories");
+            Double servingSize = currentItem.getDouble("servingSize");
+            consoleText.append("Calories:" + calories + " Cal\n");
+            consoleText.append("Serving:" + servingSize + " Servings\n");
+            mScrollView.smoothScrollTo(0, consoleText.getBottom());
+
+            caloriesTextView.setText(String.format("%.0f Cal", (calories / 100 * weight)));
+            servingTextView.setText(String.format("%.2f Servings", (weight / servingSize)));
+        } catch (Exception e) {
+
         }
     }
 
