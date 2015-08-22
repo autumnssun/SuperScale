@@ -30,6 +30,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.EditText;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Button;
@@ -88,6 +89,11 @@ public class SerialConsoleActivity extends Activity {
     private TextView caloriesTextView;
     private TextView servingTextView;
 
+    private EditText barcodeEditText;
+
+    private TextView totalCaloriesTextView;
+    private Double totalCalories = 0.0;
+
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     AsyncTask<String, String, String> request;
 
@@ -133,6 +139,9 @@ public class SerialConsoleActivity extends Activity {
         caloriesTextView = (TextView) findViewById(R.id.calories);
         servingTextView = (TextView) findViewById(R.id.serving);
 
+        totalCaloriesTextView = (TextView) findViewById(R.id.total);
+        barcodeEditText = (EditText) findViewById(R.id.barcode);
+
         //Request the Json
         new RequestTask().execute(url);
 
@@ -143,34 +152,66 @@ public class SerialConsoleActivity extends Activity {
                 tare();
             }
         });
+
+        Button addToTotalButton = (Button) findViewById(R.id.addToTotal);
+        addToTotalButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                try {
+                    Float weight = currentWeight - weightZeroOffset;
+                    Double caloriesPerHundred = currentItem.getDouble("calories");
+                    Double calories = caloriesPerHundred / 100 * weight;
+                    totalCalories = totalCalories + calories;
+                    totalCaloriesTextView.setText(String.format("Total %.0f Cal", totalCalories));
+                    tare();
+                } catch (Exception e) {
+
+                }
+            }
+        });
+
+        barcodeEditText.setOnKeyListener(new View.OnKeyListener() {
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() != KeyEvent.ACTION_DOWN) {
+                    return true;
+                }
+
+                char unicodeChar = (char) event.getUnicodeChar();
+
+                // A digit was typed (thats good :) )
+                if (Character.isDigit(unicodeChar)) {
+                    writeMessage("Writing digit" + unicodeChar);
+                    barcode += unicodeChar;
+                    return false;
+                }
+                // Anything else except the return key
+                if (keyCode != 31) {
+                    writeMessage("Random character");
+                    return true;
+                }
+
+                String fullBarcode = barcode;
+                // clear the barcode now
+                barcode = "";
+                barcodeEditText.setText("");
+
+                writeMessage("Barcode: " + fullBarcode);
+                currentItem = getNutrition(fullBarcode); //getNutrition if barcode not found, this function returns jsonObject with name: Product not found
+                if (currentItem == null) {
+                    foodTextView.setText("Product not recognized");
+                    return false;
+                }
+                try {
+                    String name = currentItem.getString("name");
+                    foodTextView.setText(name);
+                }catch (Exception e){
+                }
+
+                return true;
+            }
+        });
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        //Listen to keyboard Event and add up the bar code value
-        char unicodeChar = (char)event.getUnicodeChar();
-        if(keyCode == 31) {
-            //31-> Exit code for bar code scaner
-            //consoleText.append("Keyboard:" + barcode + "\n");
-            mScrollView.smoothScrollTo(0, consoleText.getBottom());
 
-            currentItem = getNutrition(barcode); //getNutrition if barcode not found, this function returns jsonObject with name: Product not found
-            if (currentItem == null) {
-                foodTextView.setText("Product not recognized");
-                barcode="";
-                return false;
-            }
-            try {
-                String name = currentItem.getString("name");
-                foodTextView.setText(name);
-            }catch (Exception e){
-
-            }
-        }else{
-            barcode+=unicodeChar;
-        }
-        return false;
-    }
 
 
     //This function to clean up bar code, make sure it is only contains digits
@@ -295,7 +336,7 @@ public class SerialConsoleActivity extends Activity {
     private void updateReceivedData(byte[] data) {
         for (int i=0; i<data.length;i++) {
             if (data[i] == '\n') {
-                writeMessage("Real reading " + message);
+//                writeMessage("Real reading " + message);
                 mScrollView.smoothScrollTo(0, consoleText.getBottom());
 
                 try {
