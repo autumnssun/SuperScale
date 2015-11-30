@@ -38,6 +38,7 @@ void loop() {
     if(mySerial.available()){
     char chr=mySerial.read();
     String hex=String(chr,HEX);
+    Serial.println(hex);
     if(hex=="a"){
       //Serial.print(barCode);
       String stringVal= "{\"b\":\""+barCode+"\"}\n";
@@ -45,6 +46,7 @@ void loop() {
       stringVal.getBytes(sendbuffer, 100);
       char sendbuffersize = min(100, stringVal.length());
       BTLEserial.write(sendbuffer, sendbuffersize);
+      //Serial.print(barCode);
     }else{
       barCode=barCode+chr;
     }
