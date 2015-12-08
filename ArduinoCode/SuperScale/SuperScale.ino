@@ -31,7 +31,7 @@ void loop() {
   }
 
   sendWeight(sum1/10);
-  //Serial.println(sum1/10);
+  Serial.println(sum1/10);
   
   String barCode="";
   do{
@@ -59,7 +59,7 @@ void loop() {
 
 void sendWeight(float data){
   BTLEserial.pollACI();
-
+   
   // Ask what is our current status
   aci_evt_opcode_t status = BTLEserial.getState();
   if (status == ACI_EVT_CONNECTED) {
